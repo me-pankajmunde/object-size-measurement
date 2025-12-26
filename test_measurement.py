@@ -4,10 +4,12 @@ Test script for object size measurement without GUI display.
 This script tests the core functionality without cv2.imshow() calls.
 """
 
-import cv2
-import numpy as np
 import sys
-sys.path.insert(0, '/home/runner/work/object-size-measurement/object-size-measurement')
+import os
+import cv2
+
+# Add the current directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from measure_object_size import calibrate_with_reference, find_contours_and_measure
 import imutils
@@ -15,9 +17,9 @@ import imutils
 
 def test_measurement():
     """Test the measurement functionality."""
-    print("="*60)
+    print("=" * 60)
     print("Testing Object Size Measurement Application")
-    print("="*60)
+    print("=" * 60)
     
     # Load the demo image
     image_path = "example_objects.jpg"
@@ -40,30 +42,30 @@ def test_measurement():
     
     try:
         pixels_per_metric = calibrate_with_reference(image, reference_width)
-        print(f"   ✓ Calibration successful!")
+        print("   ✓ Calibration successful!")
         print(f"   ✓ Pixels per metric: {pixels_per_metric:.2f} pixels/cm")
     except Exception as e:
         print(f"   ✗ Calibration failed: {e}")
         return False
-    
+
     # Test measurement
-    print(f"\n3. Measuring objects in the image...")
+    print("\n3. Measuring objects in the image...")
     try:
         output = find_contours_and_measure(image, pixels_per_metric)
-        print(f"   ✓ Measurement successful!")
+        print("   ✓ Measurement successful!")
         print(f"   ✓ Output image shape: {output.shape}")
     except Exception as e:
         print(f"   ✗ Measurement failed: {e}")
         return False
-    
+
     # Save output
     output_path = "test_output.jpg"
     cv2.imwrite(output_path, output)
     print(f"\n4. Output saved to: {output_path}")
-    
-    print("\n" + "="*60)
+
+    print("\n" + "=" * 60)
     print("All tests passed successfully! ✓")
-    print("="*60)
+    print("=" * 60)
     
     return True
 

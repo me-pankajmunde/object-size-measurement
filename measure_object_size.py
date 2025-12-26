@@ -127,14 +127,14 @@ def calibrate_with_reference(image, reference_width):
     # Find contours
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    
+
     # Sort contours and get the largest one (assumed to be reference object)
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-    
+
     if len(cnts) == 0:
-        raise ValueError("No contours found in the reference image")
-    
-    # Use the leftmost contour as reference
+        raise ValueError("No contours found in the image")
+
+    # Use the largest contour as reference
     c = cnts[0]
     
     # Compute the rotated bounding box
@@ -181,7 +181,7 @@ def process_image_file(image_path, reference_width, output_path=None):
     image = imutils.resize(image, width=800)
     
     print(f"Calibrating with reference object (width: {reference_width} units)...")
-    print("Using the leftmost/largest object as reference.")
+    print("Using the largest object as reference.")
     
     try:
         pixels_per_metric = calibrate_with_reference(image, reference_width)
@@ -248,7 +248,7 @@ def process_webcam(reference_width):
             status_text = f"NOT CALIBRATED - Press 'c' to calibrate (Ref width: {reference_width})"
             color = (0, 0, 255)  # Red
         else:
-            status_text = f"CALIBRATED - Measuring... (Press 'r' to recalibrate)"
+            status_text = "CALIBRATED - Measuring... (Press 'r' to recalibrate)"
             color = (0, 255, 0)  # Green
         
         cv2.putText(display_frame, status_text, (10, 30),
