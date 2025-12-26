@@ -74,8 +74,8 @@ python measure_object_size.py --webcam --width 3.0
 
 The application uses a reference object with a known width to establish the pixel-to-metric ratio:
 
-1. Place your reference object in the image/frame (leftmost or largest object)
-2. The app detects the reference object's contour
+1. Place your reference object in the image/frame (ensure it's the largest object by area)
+2. The app detects the reference object's contour (automatically selects the largest contour)
 3. Calculates pixels per unit based on the known width
 4. This ratio is then used for all subsequent measurements
 

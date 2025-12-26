@@ -31,8 +31,8 @@ def create_demo_image():
     cv2.rectangle(img, (500, 450), (580, 530), (0, 0, 0), -1)
     
     # Add title
-    cv2.putText(img, "Sample Objects - Reference is leftmost (5cm wide)", 
-                (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    cv2.putText(img, "Sample Objects - Leftmost is largest/reference (5cm wide)",
+                (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
     
     return img
 
@@ -46,4 +46,4 @@ if __name__ == "__main__":
     print(f"Demo image saved to: {output_path}")
     print("\nYou can now test the measurement app with:")
     print(f"python measure_object_size.py --image {output_path} --width 5.0 --output measured_output.jpg")
-    print("\nThe leftmost rectangle is the reference object (5cm wide).")
+    print("\nThe leftmost rectangle is the largest object and will be used as reference (5cm wide).")
