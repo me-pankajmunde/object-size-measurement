@@ -14,36 +14,17 @@ import imutils
 import cv2
 
 
-# Class for point
-class point:
-    x = 0
-    y = 0
-
-
-# Points for Left Right Top and Bottom
-plL = point()
-plR = point()
-plU = point()
-plD = point()
+# Constants
+# Pixels per metric ratio - needs to be calibrated based on reference object
+# This represents the number of pixels per inch in the reference setup
+PIXELS_PER_METRIC = 116
+# Conversion factor from inches to millimeters
+INCH_TO_MM = 25.4
 
 
 # For finding midpoint
 def midpoint(ptA, ptB):
     return ((ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5)
-
-
-def bg_sub(frame):
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower_green = np.array([100, 0, 0])
-    upper_green = np.array([197, 255, 255])
-
-    mask = cv2.inRange(hsv, lower_green, upper_green)
-    mask_inv = cv2.bitwise_not(mask)
-
-    bg = cv2.bitwise_and(frame, frame, mask=mask)
-
-    cv2.imshow('BG_SUB', bg)
-    return bg
 
 
 def main():
@@ -98,31 +79,13 @@ def main():
                     box1 = np.zeros(box.shape)
                     rcX = 0
                     rcY = 0
-                    refObj = (box1, (rcX, rcY), 116)
+                    refObj = (box1, (rcX, rcY), PIXELS_PER_METRIC)
 
                 # draw the contours on the image
                 orig = image.copy()
 
                 cv2.drawContours(image, [box.astype("int")], -1, (0, 255, 0), 1)
                 cv2.drawContours(image, [refObj[0].astype("int")], -1, (0, 255, 0), 1)
-
-                # stack the reference coordinates and the object coordinates
-                # to include the object center
-                refCoords = np.vstack([refObj[0], refObj[1]])
-                objCoords = np.vstack([box, (cX, cY)])
-
-                # Give them values
-                plL.x = box[0][0]
-                plL.y = box[0][1]
-
-                plR.x = box[1][0]
-                plR.y = box[1][1]
-
-                plU.x = box[2][0]
-                plU.y = box[2][1]
-
-                plD.x = box[3][0]
-                plD.y = box[3][1]
 
                 # Finding Height and width
                 for (x, y) in box:
@@ -158,17 +121,15 @@ def main():
 
                 # if the pixels per metric has not been initialized, then
                 # compute it as the ratio of pixels to supplied metric
-                # (in this case, inches)
                 if pixelsPerMetric is None:
-                    pixelsPerMetric = 116  # This ratio needs to be set manually
+                    pixelsPerMetric = PIXELS_PER_METRIC
 
                 # compute the size of the object
-                dimA = dA / pixelsPerMetric
-                dimB = dB / pixelsPerMetric
-                dimA *= 25.4
-                dimB *= 25.4
+                # Convert from pixels to inches, then to millimeters
+                dimA = (dA / pixelsPerMetric) * INCH_TO_MM
+                dimB = (dB / pixelsPerMetric) * INCH_TO_MM
+                
                 if dimA <= 26 and dimA >= 23.9:
-
                     # draw the object sizes on the image
                     cv2.putText(orig, "{:.1f}mm".format(25),
                                 (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
@@ -176,7 +137,7 @@ def main():
                     cv2.putText(orig, "{:.1f}mm".format(25),
                                 (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
                                 0.60, (0, 0, 220), 1)
-                elif dimB <= 26 and dimA >= 23.9:
+                elif dimB <= 26 and dimB >= 23.9:
                     # draw the object sizes on the image
                     cv2.putText(orig, "{:.1f}mm".format(25),
                                 (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
