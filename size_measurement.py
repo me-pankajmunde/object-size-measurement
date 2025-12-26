@@ -21,6 +21,23 @@ PIXELS_PER_METRIC = 116
 # Conversion factor from inches to millimeters
 INCH_TO_MM = 25.4
 
+# Standard object size thresholds (in millimeters)
+SIZE_25MM_MIN = 23.9
+SIZE_25MM_MAX = 26.0
+SIZE_21MM_MAX = 21.6
+SIZE_17MM_MIN = 16.2
+SIZE_8MM_MAX = 8.3
+SIZE_8MM_MIN = 7.0
+
+# Text display constants
+TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX
+TEXT_SCALE = 0.60
+TEXT_COLOR = (0, 0, 220)
+TEXT_THICKNESS = 1
+TEXT_OFFSET_X_LEFT = -15
+TEXT_OFFSET_Y_TOP = -10
+TEXT_OFFSET_X_RIGHT = 10
+
 
 # For finding midpoint
 def midpoint(ptA, ptB):
@@ -52,11 +69,8 @@ def main():
             cnts, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                                     cv2.CHAIN_APPROX_SIMPLE)
 
-            # sort the contours from left-to-right and, then initialize the
-            # distance colors and reference object
+            # sort the contours from left-to-right and initialize the reference object
             (cnts, _) = contours.sort_contours(cnts)
-            colors = ((0, 0, 255), (240, 0, 159), (0, 165, 255), (255, 255, 0),
-                      (255, 0, 255))
             refObj = None
             pixelsPerMetric = None
 
@@ -71,9 +85,6 @@ def main():
                 box = cv2.boxPoints(box)
                 box = np.array(box, dtype="int")
                 box = perspective.order_points(box)
-                # compute the center of the bounding box
-                cX = np.average(box[:, 0])
-                cY = np.average(box[:, 1])
 
                 if refObj is None:
                     box1 = np.zeros(box.shape)
@@ -129,54 +140,55 @@ def main():
                 dimA = (dA / pixelsPerMetric) * INCH_TO_MM
                 dimB = (dB / pixelsPerMetric) * INCH_TO_MM
                 
-                if dimA <= 26 and dimA >= 23.9:
-                    # draw the object sizes on the image
+                # Determine which standard size this object matches and display accordingly
+                if SIZE_25MM_MIN <= dimA <= SIZE_25MM_MAX:
+                    # 25mm x 25mm object
                     cv2.putText(orig, "{:.1f}mm".format(25),
-                                (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
+                                (int(tltrX + TEXT_OFFSET_X_LEFT), int(tltrY + TEXT_OFFSET_Y_TOP)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                     cv2.putText(orig, "{:.1f}mm".format(25),
-                                (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
-                elif dimB <= 26 and dimB >= 23.9:
-                    # draw the object sizes on the image
+                                (int(trbrX + TEXT_OFFSET_X_RIGHT), int(trbrY)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
+                elif SIZE_25MM_MIN <= dimB <= SIZE_25MM_MAX:
+                    # 25mm x 25mm object (alternate dimension)
                     cv2.putText(orig, "{:.1f}mm".format(25),
-                                (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
+                                (int(tltrX + TEXT_OFFSET_X_LEFT), int(tltrY + TEXT_OFFSET_Y_TOP)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                     cv2.putText(orig, "{:.1f}mm".format(25),
-                                (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
-                elif dimA <= 21.6 and dimB >= 16.2:
+                                (int(trbrX + TEXT_OFFSET_X_RIGHT), int(trbrY)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
+                elif dimA <= SIZE_21MM_MAX and dimB >= SIZE_17MM_MIN:
+                    # 21mm x 17mm object
                     if dimA > dimB:
-                        # draw the object sizes on the image
                         cv2.putText(orig, "{:.1f}mm".format(21),
-                                    (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.60, (0, 0, 220), 1)
+                                    (int(tltrX + TEXT_OFFSET_X_LEFT), int(tltrY + TEXT_OFFSET_Y_TOP)), 
+                                    TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                         cv2.putText(orig, "{:.1f}mm".format(17),
-                                    (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.60, (0, 0, 220), 1)
+                                    (int(trbrX + TEXT_OFFSET_X_RIGHT), int(trbrY)), 
+                                    TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                     else:
-                        # draw the object sizes on the image
                         cv2.putText(orig, "{:.1f}mm".format(17),
-                                    (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.60, (0, 0, 220), 1)
+                                    (int(tltrX + TEXT_OFFSET_X_LEFT), int(tltrY + TEXT_OFFSET_Y_TOP)), 
+                                    TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                         cv2.putText(orig, "{:.1f}mm".format(21),
-                                    (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.60, (0, 0, 220), 1)
-                elif dimA <= 8.3 and dimB >= 7:
+                                    (int(trbrX + TEXT_OFFSET_X_RIGHT), int(trbrY)), 
+                                    TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
+                elif dimA <= SIZE_8MM_MAX and dimB >= SIZE_8MM_MIN:
+                    # 8mm x 8mm object
                     cv2.putText(orig, "{:.1f}mm".format(8),
-                                (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
+                                (int(tltrX + TEXT_OFFSET_X_LEFT), int(tltrY + TEXT_OFFSET_Y_TOP)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                     cv2.putText(orig, "{:.1f}mm".format(8),
-                                (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
-
+                                (int(trbrX + TEXT_OFFSET_X_RIGHT), int(trbrY)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                 else:
+                    # Unknown size - display calculated dimensions
                     cv2.putText(orig, "{:.1f}mm".format(dimA),
-                                (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
+                                (int(tltrX + TEXT_OFFSET_X_LEFT), int(tltrY + TEXT_OFFSET_Y_TOP)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                     cv2.putText(orig, "{:.1f}mm".format(dimB),
-                                (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.60, (0, 0, 220), 1)
+                                (int(trbrX + TEXT_OFFSET_X_RIGHT), int(trbrY)), 
+                                TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS)
                 # show the output image
 
                 cv2.imshow("Size Of Object", orig)
